@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" >
+        function preventBack(){window.history.forward();}
+        setTimeout("preventBack()", 0);
+        window.onunload=function(){null};
+    </script>
+    <script>
+        function buyItem(idItem,name) {
+            $.ajax({
+                type: 'PUT',
+                url: '/dsaApp/game/buyItems/'+ idItem +'/'+ name + '/' + sessionStorage.getItem('idUser'),
+                data: { get_param: 'value'},
+                dataType: 'text',
+                success: function(){
+                    alert("Item bought!");
+                },
+                error: function(){
+                    alert("Item not bought!");
+                }
+            });
+        }
+        function hidebutton(element) {
+            element.style.display="none";
+        }
+        $(document).ready(function(){
+            $("#shopButton").click(function(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/dsaApp/game/shop',
+                    //data: { get_param: 'value'},
+                    dataType: 'text',
+                    success: function(data){
+                        const json = $.parseJSON(data);
+                        var htmlLine;
+
+                            if(json.length>0) {
+                            htmlLine='<div class="row">' +
+                                '<div class="column">' +
+                                '<div class="card">' +
+                                '<img src="'+json[0].image+'" width="200" height="200">'+
+                                '<div class="flex-container">' +
+                                '<div><b>'+json[0].name+'</b></div><div><p>'+json[0].price+' coins</p></div>' +
+                                '</div>' +
+                                '<div class="flex-container">' +
+                                '<button type="button" class="btn btn-outline-info" onclick="buyItem('+json[0].idItem+',\''+json[0].name+'\')">BUY</button>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+
+                            for (i = 1; i < json.length; i++) {
+                                if (i % 3 == 0) {
+                                    htmlLine+='</div>' +
+                                        '<div class="row">' +
+                                        '<div class="column">' +
+                                        '<div class="card">' +
+                                        '<img src="'+json[i].image+'" width="200" height="200">'+
+                                        '<div class="flex-container">' +
+                                        '<div><b>'+json[i].name+'</b></div><div><p>'+json[i].price+' coins</p></div>' +
+                                        '</div>'+
+                                        '<div class="flex-container">' +
+                                        '<button type="button" class="btn btn-outline-info" onclick="buyItem('+json[i].idItem+',\''+json[i].name+'\')">BUY</button>'+
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
+                                } else {
+                                    htmlLine += '<div class="column">' +
+                                        '<div class="card">' +
+                                        '<img src="'+json[i].image+'" width="200" height="200">' +
+                                        '<div class="flex-container">' +
+                                        '<div><b>'+json[i].name+'</b></div><div><p>'+json[i].price+' coins</p></div>' +
+                                        '</div>' +
+                                        '<div class="flex-container">' +
+                                        '<button type="button" class="btn btn-outline-info" onclick="buyItem('+json[i].idItem+',\''+json[i].name+'\')">BUY</button>'+
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
+                                }
+                            }
+                            htmlLine = htmlLine+'</div>'
+                            $('#itemCards').append(htmlLine);
+                        }
+                    }
+
+                });
+            });
+            $("#logoutButton").click(function () {
+                location.href = "/index.html"
+            });
+            $("#inventoryButton").click(function(){
+                $.ajax({
+                    type: 'GET',
+                    url: '/dsaApp/game/inventory/'+ sessionStorage.getItem('idUser'),
+                    dataType: 'text',
+                    success: function(data){
+                        const json = $.parseJSON(data);
+                        var htmlLine;
+
+                        if(json.length>0) {
+                            htmlLine='<div class="row">' +
+                                '<div class="column">' +
+                                '<div class="flex-container">' +
+                                '<div><b>'+json[0].name+'</b></div>' +
+                                '</div>' +
+                                '</div>';
+
+                            for (i = 1; i < json.length; i++) {
+                                htmlLine+='</div>' +
+                                    '<div class="row">' +
+                                    '<div class="column">' +
+                                    '<div class="flex-container">' +
+                                    '<div><b>'+json[i].name+'</b></div>' +
+                                    '</div>'+
+                                    '</div>';
+                            }
+                            htmlLine = htmlLine+'</div>'
+                            $('#inventoryCards').append(htmlLine);
+                        }
+                    }
+
+                });
+            });
+            $("#updateButton").click(function () {
+                $(location).attr('href', "update.html");
+            });
+            $("#reportButton").click(function () {
+                $(location).attr('href', "report.html");
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container mt-3" style="text-align:center">
+    <h3>Shop</h3>
+    <p>These are the items available for purchase!</p>
+</div>
+<div class="container" style="margin: auto; width: 90%">
+    <div id="inventoryCards" class="center" style="text-align: center"></div>
+    <div id="itemCards" class="center" style="text-align: center"></div>
+    <spacer type="vertical" width="50"  height="50"></spacer>
+    <div class="form-group">
+        <button onclick="hidebutton(this)" type="button" class="btn btn-primary btn-block" id="shopButton">Shop</button>
+        <div class="signup_link" style="text-align:center"></div>
+    </div>
+    <div class="form-group">
+        <button onclick="hidebutton(this)" type="button" class="btn btn-primary btn-block" id="inventoryButton">Inventory</button>
+        <div class="signup_link" style="text-align:center"></div>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-block" id = "updateButton"> Update</button>
+        <div class="signup_link" style="text-align:center">
+        </div>
+    </div>
+    <div class="form-group">
+        <button onclick="hidebutton(this)" type="button" class="btn btn-primary btn-block" id="reportButton">Report an abuse</button>
+        <div class="signup_link" style="text-align:center"></div>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-block" id = "logoutButton"> Log Out</button>
+        <div class="signup_link" style="text-align:center"></div>
+    </div>
+</div>
+</body>
+</html>
